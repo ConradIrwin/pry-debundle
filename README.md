@@ -85,3 +85,7 @@ Meta-fu
 
 Licensed under the MIT license (see `LICENSE.MIT`). Bug reports and pull requests are
 welcome.
+
+It's possible that Bundler will solve this issue themselves, in which case I expect to
+deprecate this gem. See https://github.com/carlhuda/bundler/issues/183 for some
+discussion.
