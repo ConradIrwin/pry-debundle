@@ -42,13 +42,13 @@ class << Pry
     if defined?(Gem.post_reset_hooks)
       Gem.post_reset_hooks.reject!{ |hook| hook.source_location.first =~ %r{/bundler/} }
       Gem::Specification.reset
-      load File.expand_path("../rubygems/custom_require.rb", Gem.method(:post_reset_hooks).source_location.first)
+      load 'rubygems/custom_require.rb'
       loaded = true
 
     # Rubygems 1.6 — TODO might be quite slow.
     elsif Gem.source_index && Gem.send(:class_variable_get, :@@source_index)
       Gem.source_index.refresh!
-      load File.expand_path("../rubygems/custom_require.rb", Gem.method(:source_index).source_location.first)
+      load 'rubygems/custom_require.rb'
       loaded = true
 
     else
