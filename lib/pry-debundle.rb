@@ -86,3 +86,6 @@ Pry.config.hooks.add_hook(:before_session, :debundle){ Pry.debundle! }
 # This handles the case where you load something that loads bundler
 # into your Pry.
 Pry.config.hooks.add_hook(:after_eval, :debundle){ Pry.debundle! }
+
+# Run after a Pry.start call.
+Pry.config.hooks.add_hook(:when_started, :debundle){ Pry.debundle! }
