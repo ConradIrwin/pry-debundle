@@ -80,12 +80,10 @@ end
 
 # Run just after a binding.pry, before you get dumped in the REPL.
 # This handles the case where Bundler is loaded before Pry.
-Pry.config.hooks.add_hook(:before_session, :debundle){ Pry.debundle! }
+# NOTE: This hook happens *before* :before_session
+Pry.config.hooks.add_hook(:when_started, :debundle){ Pry.debundle! }
 
 # Run after every line of code typed.
 # This handles the case where you load something that loads bundler
 # into your Pry.
 Pry.config.hooks.add_hook(:after_eval, :debundle){ Pry.debundle! }
-
-# Run after a Pry.start call.
-Pry.config.hooks.add_hook(:when_started, :debundle){ Pry.debundle! }
