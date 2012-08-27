@@ -43,12 +43,14 @@ class << Pry
       Gem.post_reset_hooks.reject!{ |hook| hook.source_location.first =~ %r{/bundler/} }
       Gem::Specification.reset
       load 'rubygems/custom_require.rb'
+      ::Kernel.class_eval { alias gem require }
       loaded = true
 
     # Rubygems 1.6 — TODO might be quite slow.
     elsif Gem.source_index && Gem.send(:class_variable_get, :@@source_index)
       Gem.source_index.refresh!
       load 'rubygems/custom_require.rb'
+      ::Kernel.class_eval { alias gem require }
       loaded = true
 
     else
