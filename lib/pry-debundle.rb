@@ -38,17 +38,16 @@ class << Pry
   def debundle!
     loaded = false
 
-    # Rubygems 1.8
-    if defined?(Gem.post_reset_hooks)
+    if rubygems_18?
       Gem.post_reset_hooks.reject!{ |hook| hook.source_location.first =~ %r{/bundler/} }
       Gem::Specification.reset
-      load 'rubygems/custom_require.rb'
+      remove_bundler_mokeypatches
       loaded = true
 
     # Rubygems 1.6 — TODO might be quite slow.
     elsif Gem.source_index && Gem.send(:class_variable_get, :@@source_index)
       Gem.source_index.refresh!
-      load 'rubygems/custom_require.rb'
+      remove_bundler_mokeypatches
       loaded = true
 
     else
@@ -75,6 +74,36 @@ class << Pry
     new_plugins = Pry.plugins.values - old_plugins
 
     new_plugins.each(&:activate!)
+  end
+
+  private
+
+  def rubygems_18?
+    defined?(Gem.post_reset_hooks)
+  end
+
+  # Ugh, this stuff is quite vile.
+  def remove_bundler_mokeypatches
+    load 'rubygems/custom_require.rb'
+
+    if rubygems_18?
+      Kernel.module_eval do
+        def gem(gem_name, *requirements) # :doc:
+          skip_list = (ENV['GEM_SKIP'] || "").split(/:/)
+          raise Gem::LoadError, "skipping #{gem_name}" if skip_list.include? gem_name
+          spec = Gem::Dependency.new(gem_name, *requirements).to_spec
+          spec.activate if spec
+        end
+      end
+    else
+      Kernel.module_eval do
+        def gem(gem_name, *requirements) # :doc:
+          skip_list = (ENV['GEM_SKIP'] || "").split(/:/)
+          raise Gem::LoadError, "skipping #{gem_name}" if skip_list.include? gem_name
+          Gem.activate(gem_name, *requirements)
+        end
+      end
+    end
   end
 end
 

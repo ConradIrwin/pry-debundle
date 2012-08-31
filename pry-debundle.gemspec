@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = "pry-debundle"
-  s.version = "0.3"
+  s.version = "0.4"
   s.platform = Gem::Platform::RUBY
   s.author = "Conrad Irwin"
   s.email = "conrad.irwin@gmail.com"
