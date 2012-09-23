@@ -41,13 +41,13 @@ class << Pry
     if rubygems_18?
       Gem.post_reset_hooks.reject!{ |hook| hook.source_location.first =~ %r{/bundler/} }
       Gem::Specification.reset
-      remove_bundler_mokeypatches
+      remove_bundler_monkeypatches
       loaded = true
 
     # Rubygems 1.6 — TODO might be quite slow.
     elsif Gem.source_index && Gem.send(:class_variable_get, :@@source_index)
       Gem.source_index.refresh!
-      remove_bundler_mokeypatches
+      remove_bundler_monkeypatches
       loaded = true
 
     else
@@ -83,7 +83,7 @@ class << Pry
   end
 
   # Ugh, this stuff is quite vile.
-  def remove_bundler_mokeypatches
+  def remove_bundler_monkeypatches
     load 'rubygems/custom_require.rb'
 
     if rubygems_18?
