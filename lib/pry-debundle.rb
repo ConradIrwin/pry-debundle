@@ -36,6 +36,7 @@ class << Pry
   # See https://github.com/carlhuda/bundler/issues/183 for some background.
   # 
   def debundle!
+    return unless defined?(Bundler)
     loaded = false
 
     if rubygems_18?
