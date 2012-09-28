@@ -39,10 +39,11 @@ class << Pry
     loaded = false
 
     if rubygems_18?
-      Gem.post_reset_hooks.reject!{ |hook| hook.source_location.first =~ %r{/bundler/} }
-      Gem::Specification.reset
-      remove_bundler_monkeypatches
-      loaded = true
+      if Gem.post_reset_hooks.reject!{ |hook| hook.source_location.first =~ %r{/bundler/} }
+        Gem::Specification.reset
+        remove_bundler_monkeypatches
+        loaded = true
+      end
 
     # Rubygems 1.6 — TODO might be quite slow.
     elsif Gem.source_index && Gem.send(:class_variable_get, :@@source_index)
