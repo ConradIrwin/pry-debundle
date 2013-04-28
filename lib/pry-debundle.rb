@@ -39,7 +39,7 @@ class << Pry
     return unless defined?(Bundler)
     loaded = false
 
-    if rubygems_18?
+    if rubygems_18_or_better?
       if Gem.post_reset_hooks.reject!{ |hook| hook.source_location.first =~ %r{/bundler/} }
         Gem::Specification.reset
         remove_bundler_monkeypatches
@@ -80,15 +80,23 @@ class << Pry
 
   private
 
-  def rubygems_18?
+  def rubygems_18_or_better?
     defined?(Gem.post_reset_hooks)
+  end
+
+  def rubygems_20_or_better?
+    Gem::VERSION.to_i >= 2
   end
 
   # Ugh, this stuff is quite vile.
   def remove_bundler_monkeypatches
-    load 'rubygems/custom_require.rb'
+    if rubygems_20_or_better?
+      load 'rubygems/core_ext/kernel_require.rb'
+    else
+      load 'rubygems/custom_require.rb'
+    end
 
-    if rubygems_18?
+    if rubygems_18_or_better?
       Kernel.module_eval do
         def gem(gem_name, *requirements) # :doc:
           skip_list = (ENV['GEM_SKIP'] || "").split(/:/)
