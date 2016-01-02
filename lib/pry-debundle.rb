@@ -16,10 +16,13 @@
 #   Create a wrapper script that runs `pry -r<your-application>`
 #
 # 4. Pants, if you don't like Pry:
-#   Copy the definition of the debundle! method into your ~/.irbrc
-#   Call 'debundle!' from IRB when you need to.
-#
-class << Pry
+#   Run `gem which pry-debundle` outside the Ruby console,
+#   and call `load '/path/to/pry-debundle.rb'; Debundle.debundle!`
+#   when you need to.
+
+module Debundle; end
+
+class << Debundle
 
   # Break out of the Bundler jail.
   #
@@ -34,7 +37,7 @@ class << Pry
   # starts.
   #
   # See https://github.com/carlhuda/bundler/issues/183 for some background.
-  # 
+  #
   def debundle!
     return unless defined?(Bundler)
     loaded = false
@@ -66,7 +69,29 @@ class << Pry
     puts "* ruby version: #{RUBY_VERSION rescue 'undefined'}"
     puts "* ruby engine: #{RUBY_ENGINE rescue 'undefined'}"
   else
-    load_additional_plugins if loaded
+    return unless loaded
+
+    if !pry_present?
+      require 'pry'
+      extend_pry
+    end
+
+    load_additional_plugins
+  end
+
+  # If Pry is present, extend it. Otherwise, fail with noise.
+  def extend_pry
+    Pry.extend(Debundle)
+
+    # Run just after a binding.pry, before you get dumped in the REPL.
+    # This handles the case where Bundler is loaded before Pry.
+    # NOTE: This hook happens *before* :before_session
+    Pry.config.hooks.add_hook(:when_started, :debundle){ Pry.debundle! }
+
+    # Run after every line of code typed.
+    # This handles the case where you load something that loads bundler
+    # into your Pry.
+    Pry.config.hooks.add_hook(:after_eval, :debundle){ Pry.debundle! }
   end
 
   # After we've escaped from Bundler we want to look around and find any plugins the user
@@ -78,6 +103,10 @@ class << Pry
     new_plugins = Pry.plugins.values - old_plugins
 
     new_plugins.each(&:activate!)
+  end
+
+  def pry_present?
+    defined?(Pry) && Pry.respond_to?(:plugins)
   end
 
   private
@@ -119,12 +148,4 @@ class << Pry
   end
 end
 
-# Run just after a binding.pry, before you get dumped in the REPL.
-# This handles the case where Bundler is loaded before Pry.
-# NOTE: This hook happens *before* :before_session
-Pry.config.hooks.add_hook(:when_started, :debundle){ Pry.debundle! }
-
-# Run after every line of code typed.
-# This handles the case where you load something that loads bundler
-# into your Pry.
-Pry.config.hooks.add_hook(:after_eval, :debundle){ Pry.debundle! }
+Debundle.extend_pry if Debundle.pry_present?
