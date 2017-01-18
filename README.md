@@ -73,7 +73,7 @@ end
 ```
 
 ```bash
-curl https://raw.github.com/ConradIrwin/pry-debundle/master/lib/pry-debundle.rb >> ~/.pryrc
+curl https://raw.githubusercontent.com/ConradIrwin/pry-debundle/master/lib/pry-debundle.rb >> ~/.pryrc
 ```
 
 If you can't even persuade people to allow you to add Pry to the Gemfile, then you can
